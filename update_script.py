@@ -110,7 +110,7 @@ def download_pdf(pdf_url):
 
 def convert_pdf_to_jpg():
     """PDF를 JPG로 변환"""
-    images = convert_from_path(PDF_SAVE_PATH)
+    images = convert_from_path(PDF_PATH)
     if images:
         images[0].save(JPG_SAVE_PATH, "JPEG")   # 첫 페이지를 JPG로 저장
 
