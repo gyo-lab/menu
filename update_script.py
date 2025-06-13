@@ -14,6 +14,7 @@ from github.GithubException import UnknownObjectException
 BASE_URL = "https://assembly.go.kr/portal/bbs/B0000054/list.do?pageIndex=1&menuNo=600100&sdate=&edate=&searchDtGbn=c0&pageUnit=10&pageIndex=1&cl1Cd=AN01"
 PDF_PATH = "weekly_menu.pdf"  # PDF 파일 경로
 OUTPUT_PATH = "weekly_menu.json"  # 저장할 JSON 파일 경로
+JPG_SAVE_PATH = "weekly-menu.jpg"  # 저장할 JPG 파일 경로
 
 # 식당별 열 인덱스 정의 (0-based index)
 restaurant_columns = {
