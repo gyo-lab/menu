@@ -1,71 +1,242 @@
 <!DOCTYPE html>
-<html>
+<html lang="ko">
 <head>
-  <title>WEB1 - Welcome</title>
-  <meta charset="utf-8">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>주간 식단표</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+    h1 {
+      text-align: center;
+      color: #0077cc;
+      margin-bottom: 10px;
+    }
+    .toggle-switch {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+    .toggle-input {
+      display: none;
+    }
+    .toggle-label {
+      width: 60px;
+      height: 30px;
+      background-color: #ccc;
+      border-radius: 15px;
+      position: relative;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .toggle-label::before {
+      content: '';
+      width: 26px;
+      height: 26px;
+      background-color: white;
+      border-radius: 50%;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: 0.3s;
+    }
+    .toggle-input:checked + .toggle-label::before {
+      transform: translateX(30px);
+    }
+    .toggle-input:checked + .toggle-label {
+      background-color: #0077cc;
+    }
+    .date-navigation {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+    }
+    button {
+      background-color: #0077cc;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #005fa3;
+    }
+    .date-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+    .restaurant {
+      margin-top: 24px;
+    }
+    .restaurant h2 {
+      font-size: 20px;
+      color: #222;
+      margin-bottom: 6px;
+    }
+    .meal {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin: 4px 0;
+      padding: 10px;
+      background-color: #f0f4f8;
+      border-radius: 6px;
+    }
+    .meal span {
+      flex: 0 0 60px;
+      font-weight: bold;
+    }
+    .meal.gray {
+      color: #999;
+    }
+    #imageView {
+      display: none;
+      text-align: center;
+    }
+    #imageView img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  </style>
 </head>
-
 <body>
-  <h1><a href="index.html">WEB</a></h1>
-  <div id="grid">
-    <ol>
-      <li><a href="1.html">HTML</a></li>
-      <li><a href="2.html">CSS</a></li>
-      <li><a href="3.html">Javascript</a></li>
-    </ol>
-    <!--
-    <h1><a href="index.html"><font color="red">WEB</font></a></h1>
-    <ol>
-      <li><a href="1.html"><font color="red">HTML</font></a></li>
-      <li><a href="2.html"><font color="red">CSS</font></a></li>
-      <li><a href="3.html"><font color="red">Javascript</font></a></li>
-    </ol>
-    -->
-    <div id="article">
-      <h2>WEB</h2>
-      <p>The World Wide Web (abbreviated WWW or the Web) is an information space where documents and other web resources are identified by Uniform Resource Locators (URLs), interlinked by hypertext links, and can be accessed via the Internet.[1] English scientist Tim Berners-Lee invented the World Wide Web in 1989. He wrote the first web browser computer program in 1990 while employed at CERN in Switzerland.[2][3] The Web browser was released outside of CERN in 1991, first to other research institutions starting in January 1991 and to the general public on the Internet in August 1991.
-      </p>
-      <p>
-        <!-- 댓글 기능 -->
-        <div id="disqus_thread">
-          <script>
-          /**
-          *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-          *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables*/
-          /*
-          var disqus_config = function () {
-          this.page.url = PAGE_URL;  // Replace PAGE_URL with your page's canonical URL variable
-          this.page.identifier = PAGE_IDENTIFIER; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-          };
-          */
-          (function() { // DON'T EDIT BELOW THIS LINE
-          var d = document, s = d.createElement('script');
-          s.src = 'https://web1-zgj8grx2ft.disqus.com/embed.js';
-          s.setAttribute('data-timestamp', +new Date());
-          (d.head || d.body).appendChild(s);
-          })();
-          </script>
-          <noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-        </div>
-      </p>
-      <p>
-        <!-- 채팅 기능 -->
-            <!--Start of Tawk.to Script-->
-          <script type="text/javascript">
-          var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-          (function(){
-          var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-          s1.async=true;
-          s1.src='https://embed.tawk.to/5e6dc3018d24fc226587a2ff/default';
-          s1.charset='UTF-8';
-          s1.setAttribute('crossorigin','*');
-          s0.parentNode.insertBefore(s1,s0);
-          })();
-          </script>
-          <!--End of Tawk.to Script-->
-        </p>
+  <div class="container">
+    <h1>주간 식단표</h1>
+
+    <div class="toggle-switch">
+      <input type="checkbox" class="toggle-input" id="toggle" onchange="handleToggle(this)" />
+      <label class="toggle-label" for="toggle"></label>
+    </div>
+
+    <div id="txtView">
+      <div class="date-navigation">
+        <button onclick="prevDate()">◀ 이전</button>
+        <div class="date-title" id="dateTitle"></div>
+        <button onclick="nextDate()">다음 ▶</button>
+      </div>
+      <div id="menuContainer"></div>
+    </div>
+
+    <div id="imageView">
+      <img src="weekly-menu.jpg" alt="주간 식단표 이미지" />
     </div>
   </div>
+
+  <script>
+    let menuData = {};
+    let dates = [];
+    let currentIndex = 0;
+
+    async function fetchMenuData() {
+      const response = await fetch("weekly_menu.json");
+      const data = await response.json();
+      return data;
+    }
+
+    function renderMenu() {
+      const date = dates[currentIndex];
+      document.getElementById("dateTitle").innerText = date;
+      const container = document.getElementById("menuContainer");
+      container.innerHTML = "";
+
+      const dailyData = menuData[date];
+      for (const [restaurant, meals] of Object.entries(dailyData)) {
+        const hasVisibleMeal = Object.entries(meals).some(([time, menu]) => !shouldHide(restaurant, date, time) && menu);
+        if (!hasVisibleMeal) continue;
+
+        const resDiv = document.createElement("div");
+        resDiv.className = "restaurant";
+
+        const resTitle = document.createElement("h2");
+        resTitle.innerText = restaurant;
+        resDiv.appendChild(resTitle);
+
+        for (const [time, menu] of Object.entries(meals)) {
+          if (shouldHide(restaurant, date, time) || !menu) continue;
+
+          const mealDiv = document.createElement("div");
+          mealDiv.className = "meal";
+          if (menu.includes("영업을하지않습니다")) {
+            mealDiv.classList.add("gray");
+          }
+          mealDiv.innerHTML = `<span>${time}</span> <div>${menu}</div>`;
+          resDiv.appendChild(mealDiv);
+        }
+        container.appendChild(resDiv);
+      }
+    }
+
+    function shouldHide(restaurant, date, time) {
+      const weekend = ["토요일", "일요일"].includes(date);
+      const weekday = ["월요일", "화요일", "수요일", "목요일", "금요일"].includes(date);
+      if (restaurant === "도서관식당") {
+        if ((weekday && time === "아침") || (weekend && time !== "점심")) return true;
+      }
+      if (restaurant === "박물관식당" && time !== "점심") return true;
+      if (["본관1식당", "회관1식당"].includes(restaurant) && weekend && time !== "점심") return true;
+      return false;
+    }
+
+    function prevDate() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderMenu();
+      }
+    }
+
+    function nextDate() {
+      if (currentIndex < dates.length - 1) {
+        currentIndex++;
+        renderMenu();
+      }
+    }
+
+    function handleToggle(toggle) {
+      const txtView = document.getElementById("txtView");
+      const imgView = document.getElementById("imageView");
+      if (toggle.checked) {
+        txtView.style.display = "none";
+        imgView.style.display = "block";
+      } else {
+        txtView.style.display = "block";
+        imgView.style.display = "none";
+      }
+    }
+
+    async function init() {
+      menuData = await fetchMenuData();
+      dates = Object.keys(menuData);
+
+      const today = new Date();
+      const weekdayMap = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+      const todayLabel = weekdayMap[today.getDay()];
+      const index = dates.indexOf(todayLabel);
+      currentIndex = index !== -1 ? index : 0;
+
+      renderMenu();
+    }
+
+    init();
+  </script>
 </body>
 </html>
