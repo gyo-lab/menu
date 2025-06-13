@@ -115,7 +115,7 @@ def convert_pdf_to_jpg():
     if images:
         images[0].save(JPG_SAVE_PATH, "JPEG")   # 첫 페이지를 JPG로 저장
 
-def upload_to_github(file_path, repo_name="gyo-lab/menu", branch="main"):
+def upload_to_github(file_path, repo_name="gyo-lab/menu", branch="master"):
     """GitHub에 파일 업로드"""
     token = os.environ.get("GITHUB_TOKEN")
     if not token:
