@@ -6,7 +6,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>주간식단표</title>
+  <link rel="stylesheet" type="text/css" href='https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css'>
   <style>
+    @font-face {
+      font-family: 'GmarketSansBold';
+      src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff') format('woff');
+      font-weight: normal;
+      font-style: normal;
+    }
     body {
       font-family: 'Pretendard', Arial, Sans-serif;
       background-color: #f7f9fc;
@@ -24,6 +31,7 @@
       position: relative;
     }
     h1 {
+      font-family: 'GmarketSansBold', Arial, Sans-serif;
       text-align: center;
       color: #0077cc;
       margin-bottom: 10px;
@@ -82,10 +90,16 @@
     }
     .date-title {
       font-weight: bold;
-      font-size: 18px;
+      font-size: 20px;
+      letter-spacing: 2px;
     }
     .restaurant {
       margin-top: 24px;
+    }
+    .restaurant-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
     .restaurant h2 {
       font-size: 20px;
@@ -95,18 +109,28 @@
     .meal {
       display: flex;
       align-items: flex-start;
-      gap: 8px;
+      gap: 14px;
       margin: 4px 0;
       padding: 10px;
       background-color: #f0f4f8;
       border-radius: 6px;
+      white-space: pre-wrap;
     }
     .meal span {
       flex: 0 0 60px;
       font-weight: bold;
+      text-align: center;
     }
     .meal.gray {
       color: #999;
+    }
+    .more-btn {
+      background: none;
+      border: none;
+      color: #0077cc;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: auto;
     }
     #imageView {
       display: none;
@@ -124,7 +148,6 @@
 <body>
   <div class="container">
     <h1>주간 식단표</h1>
-
     <div class="toggle-switch">
       <input type="checkbox" class="toggle-input" id="toggle" onchange="handleToggle(this)" />
       <label class="toggle-label" for="toggle"></label>
@@ -132,9 +155,9 @@
 
     <div id="txtView">
       <div class="date-navigation">
-        <button onclick="prevDate()">◀ 이전</button>
+        <button onclick="prevDate()">◀</button>
         <div class="date-title" id="dateTitle"></div>
-        <button onclick="nextDate()">다음 ▶</button>
+        <button onclick="nextDate()">▶</button>
       </div>
       <div id="menuContainer"></div>
     </div>
@@ -147,47 +170,86 @@
   <script>
     let menuData = {};
     let dates = [];
+    let dateLabelMap = {};
     let currentIndex = 0;
-
+    const toggleStates = {};
+  
     async function fetchMenuData() {
       const response = await fetch("weekly_menu.json");
-      const data = await response.json();
-      return data;
+      return await response.json();
     }
-
+  
+    function formatMenu(menu) {
+      return menu
+        .replaceAll(/ *, */g, '\n')  // 콤마 기준 줄바꿈
+        .replaceAll(/ *\(/g, '\n('); // 괄호 앞 줄바꿈
+    }
+  
     function renderMenu() {
       const date = dates[currentIndex];
-      document.getElementById("dateTitle").innerText = date;
+      const displayLabel = dateLabelMap[date] || date;
+      document.getElementById("dateTitle").innerText = displayLabel;
+  
       const container = document.getElementById("menuContainer");
       container.innerHTML = "";
-
+  
       const dailyData = menuData[date];
       for (const [restaurant, meals] of Object.entries(dailyData)) {
         const hasVisibleMeal = Object.entries(meals).some(([time, menu]) => !shouldHide(restaurant, date, time) && menu);
         if (!hasVisibleMeal) continue;
-
+  
         const resDiv = document.createElement("div");
         resDiv.className = "restaurant";
-
+  
+        const headerDiv = document.createElement("div");
+        headerDiv.className = "restaurant-header";
+  
         const resTitle = document.createElement("h2");
         resTitle.innerText = restaurant;
-        resDiv.appendChild(resTitle);
+        headerDiv.appendChild(resTitle);
+  
+        const hasMorning = !!meals["아침"];
+        const hasDinner = !!meals["저녁"];
+        const hasToggle = hasMorning || hasDinner;
+  
+        if (hasToggle) {
+          const toggleKey = `${date}_${restaurant}`;
+          if (!(toggleKey in toggleStates)) toggleStates[toggleKey] = false;
+  
+          const toggleBtn = document.createElement("button");
+          toggleBtn.className = "more-btn";
+          toggleBtn.innerText = toggleStates[toggleKey] ? "접기 -" : "더보기 +";
+          toggleBtn.onclick = () => {
+            toggleStates[toggleKey] = !toggleStates[toggleKey];
+            renderMenu();
+          };
+          headerDiv.appendChild(toggleBtn);
+        }
+  
+        resDiv.appendChild(headerDiv);
 
         for (const [time, menu] of Object.entries(meals)) {
-          if (shouldHide(restaurant, date, time) || !menu) continue;
+          const toggleKey = `${date}_${restaurant}`;
+
+          // 식당/요일/시간 조합상 숨겨야 하는 경우 continue
+          if (shouldHide(restaurant, date, time)) continue;
+          if ((time === "아침" || time === "저녁") && !toggleStates[toggleKey]) continue;
 
           const mealDiv = document.createElement("div");
           mealDiv.className = "meal";
-          if (menu.includes("영업을하지않습니다")) {
+
+          let menuText = menu?.trim();
+          if (!menuText || menuText.includes("영업을하지않습니다")) {
             mealDiv.classList.add("gray");
+            menuText = "영업을 하지 않습니다";
           }
-          mealDiv.innerHTML = `<span>${time}</span> <div>${menu}</div>`;
+          mealDiv.innerHTML = `<span>${time}</span> <div>${formatMenu(menuText)}</div>`;
           resDiv.appendChild(mealDiv);
         }
         container.appendChild(resDiv);
       }
     }
-
+  
     function shouldHide(restaurant, date, time) {
       const weekend = ["토요일", "일요일"].includes(date);
       const weekday = ["월요일", "화요일", "수요일", "목요일", "금요일"].includes(date);
@@ -198,21 +260,21 @@
       if (["본관1식당", "회관1식당"].includes(restaurant) && weekend && time !== "점심") return true;
       return false;
     }
-
+  
     function prevDate() {
       if (currentIndex > 0) {
         currentIndex--;
         renderMenu();
       }
     }
-
+  
     function nextDate() {
       if (currentIndex < dates.length - 1) {
         currentIndex++;
         renderMenu();
       }
     }
-
+  
     function handleToggle(toggle) {
       const txtView = document.getElementById("txtView");
       const imgView = document.getElementById("imageView");
@@ -224,21 +286,35 @@
         imgView.style.display = "none";
       }
     }
-
+  
     async function init() {
       menuData = await fetchMenuData();
-      dates = Object.keys(menuData);
+      dates = Object.keys(menuData); // 예: ["월요일", "화요일", ..., "금요일"]
+      const weekdayFull = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+      const weekdayShort = ["일", "월", "화", "수", "목", "금", "토"];
 
       const today = new Date();
-      const weekdayMap = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-      const todayLabel = weekdayMap[today.getDay()];
-      const index = dates.indexOf(todayLabel);
-      currentIndex = index !== -1 ? index : 0;
+      const todayWeekday = today.getDay(); // 0~6 (일~토)
+      const todayWeekLabel = weekdayFull[todayWeekday];
+      const baseIndex = dates.indexOf(todayWeekLabel);
 
+      // 이번 주 월요일 날짜 계산
+      const mondayOffset = todayWeekday - 1; // 월요일 = 1
+      const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - mondayOffset);
+
+      // 요일 -> 날짜 매핑 생성
+      dateLabelMap = {};
+      for (let i = 0; i < dates.length; i++) {
+        const day = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
+        const label = `${day.getMonth() + 1}/${day.getDate()}(${weekdayShort[day.getDay()]})`;
+        dateLabelMap[dates[i]] = label;
+      }
+
+      currentIndex = baseIndex !== -1 ? baseIndex : 0;
       renderMenu();
     }
 
     init();
-  </script>
+  </script> 
 </body>
 </html>
