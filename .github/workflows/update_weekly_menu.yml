@@ -2,7 +2,7 @@ name: Update Weekly Menu
 
 on:
   schedule:
-    - cron: '50 8 * * 0'   # 매주 일요일 오후 5시 50분 (UTC 기준 8시 50분)
+    - cron: '40 8 * * 0'   # 매주 일요일 오후 5시 40분 (UTC 기준 8시 40분)
   workflow_dispatch:   # 수동 실행
 
 jobs:
@@ -22,11 +22,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y poppler-utils
-          pip install requests beautifulsoup4 pdf2image PyGithub
+          pip install requests beautifulsoup4 pdf2image PyGithub pdfplumber json
 
       - name: Run update script
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           python update_script.py
           
