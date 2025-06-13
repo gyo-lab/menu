@@ -1,4 +1,3 @@
-
 import os
 import requests
 from bs4 import BeautifulSoup
@@ -218,6 +217,7 @@ def main():
         convert_pdf_to_jpg()
         upload_to_github(JPG_SAVE_PATH)
         parse_pdf_to_json(PDF_PATH, OUTPUT_PATH)
+        upload_to_github(OUTPUT_PATH)
     else:
         print("최신 게시물을 찾을 수 없습니다.")
 
