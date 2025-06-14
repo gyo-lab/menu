@@ -45,30 +45,47 @@
       display: none;
     }
     .toggle-label {
-      width: 60px;
+      width: 68px;
       height: 30px;
       background-color: #ccc;
       border-radius: 15px;
       position: relative;
       cursor: pointer;
-      display: inline-block;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      box-sizing: border-box;
+      font-size: 13px;
+      font-weight: bold;
+      color: white;
     }
     .toggle-label::before {
       content: '';
-      width: 26px;
+      width: 28px;
       height: 26px;
       background-color: white;
       border-radius: 50%;
       position: absolute;
       top: 2px;
       left: 2px;
-      transition: 0.3s;
+      transition: transform 0.3s;
+      z-index: 1;
     }
     .toggle-input:checked + .toggle-label::before {
-      transform: translateX(30px);
+      transform: translateX(38px);
     }
     .toggle-input:checked + .toggle-label {
       background-color: #0077cc;
+    }
+    .toggle-text {
+      position: relative;
+      z-index: 2;
+      margin-left: auto;
+      transition: all 0.3s;
+    }
+    .toggle-input:checked + .toggle-label .toggle-text {
+      margin-left: 0;
+      margin-right: auto;
     }
     .date-navigation {
       display: flex;
@@ -155,7 +172,9 @@
     <h1>주간 식단표</h1>
     <div class="toggle-switch">
       <input type="checkbox" class="toggle-input" id="toggle" onchange="handleToggle(this)" />
-      <label class="toggle-label" for="toggle"></label>
+      <label class="toggle-label" for="toggle">
+        <span class="toggle-text" id="toggleText">TXT</span>
+      </label>
     </div>
 
     <div id="txtView">
@@ -291,8 +310,17 @@
     function handleToggle(toggle) {
       const txtView = document.getElementById("txtView");
       const imgView = document.getElementById("imageView");
-      txtView.style.display = toggle.checked ? "none" : "block";
-      imgView.style.display = toggle.checked ? "block" : "none";
+      const toggleText = document.getElementById("toggleText");
+    
+      if (toggle.checked) {
+        txtView.style.display = "none";
+        imgView.style.display = "block";
+        toggleText.innerText = "IMG";
+      } else {
+        txtView.style.display = "block";
+        imgView.style.display = "none";
+        toggleText.innerText = "TXT";
+      }
     }
   
     async function init() {
