@@ -160,9 +160,9 @@
 
     <div id="txtView">
       <div class="date-navigation">
-        <button onclick="prevDate()">◀</button>
+        <button id="prevBtn" onclick="prevDate()">◀</button>
         <div class="date-title" id="dateTitle"></div>
-        <button onclick="nextDate()">▶</button>
+        <button id="nextBtn" onclick="nextDate()">▶</button>
       </div>
       <div id="menuContainer"></div>
     </div>
@@ -174,33 +174,43 @@
 
   <script>
     let menuData = {};
-    let dates = [];
-    let dateLabelMap = {};
-    let currentIndex = 0;
+    let baseDate = new Date();
+    const weekdayMap = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+    const shortWeekdayMap = ["일", "월", "화", "수", "목", "금", "토"];
     const toggleStates = {};
   
     async function fetchMenuData() {
       const response = await fetch("weekly_menu.json");
-      return await response.json();
+      const data = await response.json();
+      return data;
     }
-  
-    function formatMenu(menu) {
-      return menu
-        .replaceAll(/ *, */g, '\n')  // 콤마 기준 줄바꿈
-        .replaceAll(/ *\(/g, '\n('); // 괄호 앞 줄바꿈
+
+    function getDisplayDate(dateObj) {
+      const month = dateObj.getMonth() + 1;
+      const day = dateObj.getDate();
+      const shortDayName = shortWeekdayMap[dateObj.getDay()];
+      return `${month}/${day}(${shortDayName})`;
+    }
+
+    function getMenuKey(dateObj) {
+      return weekdayMap[dateObj.getDay()];
     }
   
     function renderMenu() {
-      const date = dates[currentIndex];
-      const displayLabel = dateLabelMap[date] || date;
-      document.getElementById("dateTitle").innerText = displayLabel;
-  
+      const displayDate = getDisplayDate(baseDate);
+      const menuKey = getMenuKey(baseDate);
+
+      document.getElementById("dateTitle").innerText = displayDate;  
+      document.getElementById("prevBtn").style.visibility = baseDate.getDay() === 1 ? "hidden" : "visible";
+      document.getElementById("nextBtn").style.visibility = baseDate.getDay() === 0 ? "hidden" : "visible";
+
       const container = document.getElementById("menuContainer");
       container.innerHTML = "";
   
-      const dailyData = menuData[date];
-      for (const [restaurant, meals] of Object.entries(dailyData)) {
-        const hasVisibleMeal = Object.entries(meals).some(([time, menu]) => !shouldHide(restaurant, date, time) && menu);
+      const dailyData = menuData[menuKey];
+      if (!dailyData) return;
+            for (const [restaurant, meals] of Object.entries(dailyData)) {
+        const hasVisibleMeal = Object.entries(meals).some(([time, menu]) => !shouldHide(restaurant, menuKey, time) && menu);
         if (!hasVisibleMeal) continue;
   
         const resDiv = document.createElement("div");
@@ -213,12 +223,10 @@
         resTitle.innerText = restaurant;
         headerDiv.appendChild(resTitle);
   
-        const hasMorning = !!meals["아침"];
-        const hasDinner = !!meals["저녁"];
-        const hasToggle = hasMorning || hasDinner;
+        const hasToggle = meals["아침"] || meals["저녁"];
   
         if (hasToggle) {
-          const toggleKey = `${date}_${restaurant}`;
+          const toggleKey = `${menuKey}_${restaurant}`;
           if (!(toggleKey in toggleStates)) toggleStates[toggleKey] = false;
   
           const toggleBtn = document.createElement("button");
@@ -234,26 +242,28 @@
         resDiv.appendChild(headerDiv);
 
         for (const [time, menu] of Object.entries(meals)) {
-          const toggleKey = `${date}_${restaurant}`;
-
-          // 식당/요일/시간 조합상 숨겨야 하는 경우 continue
-          if (shouldHide(restaurant, date, time)) continue;
+          const toggleKey = `${menuKey}_${restaurant}`;
+          if (shouldHide(restaurant, menuKey, time)) continue;
           if ((time === "아침" || time === "저녁") && !toggleStates[toggleKey]) continue;
 
           const mealDiv = document.createElement("div");
           mealDiv.className = "meal";
-
-          let menuText = menu?.trim();
-          if (!menuText || menuText.includes("영업을하지않습니다")) {
+          const cleanMenu = menu?.trim();
+          if (!cleanMenu || cleanMenu.includes("영업을하지않습니다")) {
             mealDiv.classList.add("gray");
-            menuText = "영업을 하지 않습니다";
+            mealDiv.innerHTML = `<span>${time}</span> <div>영업을 하지 않습니다</div>`;
+          } else {
+            mealDiv.innerHTML = `<span>${time}</span> <div>${formatMenu(cleanMenu)}</div>`;
           }
-          mealDiv.innerHTML = `<span>${time}</span> <div>${formatMenu(menuText)}</div>`;
           resDiv.appendChild(mealDiv);
         }
   
         container.appendChild(resDiv);
       }
+    }
+    
+    function formatMenu(menu) {
+      return menu.replaceAll(/ *, */g, '\n').replaceAll(/ *\(/g, '\n(');
     }
   
     function shouldHide(restaurant, date, time) {
@@ -268,61 +278,29 @@
     }
   
     function prevDate() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        renderMenu();
-      }
+      baseDate.setDate(baseDate.getDate() - 1);
+      renderMenu();
     }
   
     function nextDate() {
-      if (currentIndex < dates.length - 1) {
-        currentIndex++;
-        renderMenu();
-      }
+      baseDate.setDate(baseDate.getDate() + 1);
+      renderMenu();
+      
     }
   
     function handleToggle(toggle) {
       const txtView = document.getElementById("txtView");
       const imgView = document.getElementById("imageView");
-      if (toggle.checked) {
-        txtView.style.display = "none";
-        imgView.style.display = "block";
-      } else {
-        txtView.style.display = "block";
-        imgView.style.display = "none";
-      }
+      txtView.style.display = toggle.checked ? "none" : "block";
+      imgView.style.display = toggle.checked ? "block" : "none";
     }
   
     async function init() {
       menuData = await fetchMenuData();
-      dates = Object.keys(menuData); // 예: ["월요일", "화요일", ..., "금요일"]
-      const weekdayFull = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
-      const weekdayShort = ["일", "월", "화", "수", "목", "금", "토"];
-
-      const today = new Date();
-      const todayWeekday = today.getDay(); // 0~6 (일~토)
-      const todayWeekLabel = weekdayFull[todayWeekday];
-      const baseIndex = dates.indexOf(todayWeekLabel);
-
-      // 이번 주 월요일 날짜 계산
-      const mondayOffset = todayWeekday - 1; // 월요일 = 1
-      const monday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - mondayOffset);
-
-      // 요일 -> 날짜 매핑 생성
-      dateLabelMap = {};
-      for (let i = 0; i < dates.length; i++) {
-        const day = new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i);
-        const label = `${day.getMonth() + 1}/${day.getDate()}(${weekdayShort[day.getDay()]})`;
-        dateLabelMap[dates[i]] = label;
-      }
-
-      currentIndex = baseIndex !== -1 ? baseIndex : 0;
       renderMenu();
     }
 
-  
     init();
   </script>
-  
 </body>
 </html>
